@@ -71,7 +71,7 @@
 
 #include "tsdf_volume.h"
 #include "tsdf_volume.hpp"
-#include "Microsoft_grabber.h"
+#include "Microsoft_grabber2.h"
 
 #ifdef HAVE_OPENCV  
   #include <opencv2/highgui/highgui.hpp>
@@ -828,7 +828,7 @@ struct KinFuApp
   }
   
   inline void copy_depthRaw(const pcl::MatDepth &src, std::vector<unsigned short> &dst) {
-	  cv::Mat_<int>::const_iterator pI = src.begin<int>();
+	  cv::Mat_<unsigned short>::const_iterator pI = src.begin<unsigned short>();
 	  std::vector<unsigned short>::iterator pO = dst.begin();
 	  while(pO != dst.end()) {
 		  *pO = (unsigned short)(*pI);
@@ -836,39 +836,39 @@ struct KinFuApp
 	  }
   }
 
-  void source_cb1_device(const boost::shared_ptr<const pcl::MatDepth>& depth_wrapper)  
+  void source_cb1_device(const pcl::MatDepth& depth_wrapper)  
   {        
     {
       boost::mutex::scoped_try_lock lock(data_ready_mutex_);
       if (exit_ || !lock)
           return;
       
-      depth_.cols = depth_wrapper->cols;
-      depth_.rows = depth_wrapper->rows;
+      depth_.cols = depth_wrapper.cols;
+      depth_.rows = depth_wrapper.rows;
       depth_.step = depth_.cols * depth_.elemSize();
 
       source_depth_data_.resize(depth_.cols * depth_.rows);
       //depth_wrapper->fillDepthImageRaw(depth_.cols, depth_.rows, &source_depth_data_[0]);
-	  copy_depthRaw(*depth_wrapper,source_depth_data_);
+	  copy_depthRaw(depth_wrapper,source_depth_data_);
       depth_.data = &source_depth_data_[0];     
     }
     data_ready_cond_.notify_one();
   }
 
-  void source_cb2_device(const boost::shared_ptr<const cv::Mat>& image_wrapper, const boost::shared_ptr<const pcl::MatDepth>& depth_wrapper, float)
+  void source_cb2_device(const boost::shared_ptr<const cv::Mat>& image_wrapper, const pcl::MatDepth& depth_wrapper, float)
   {
     {
       boost::mutex::scoped_try_lock lock(data_ready_mutex_);
       if (exit_ || !lock)
           return;
                   
-      depth_.cols = depth_wrapper->cols;
-      depth_.rows = depth_wrapper->rows;
+      depth_.cols = depth_wrapper.cols;
+      depth_.rows = depth_wrapper.rows;
       depth_.step = depth_.cols * depth_.elemSize();
 
       source_depth_data_.resize(depth_.cols * depth_.rows);
       //depth_wrapper->fillDepthImageRaw(depth_.cols, depth_.rows, &source_depth_data_[0]);
-	  memcpy(&source_depth_data_[0],depth_wrapper->data,depth_.cols * depth_.rows);
+	  memcpy(&source_depth_data_[0],depth_wrapper.data,depth_.cols * depth_.rows);
       depth_.data = &source_depth_data_[0];      
       
       rgb24_.cols = image_wrapper->cols;
@@ -884,39 +884,39 @@ struct KinFuApp
   }
 
 
-   void source_cb1_oni(const boost::shared_ptr<const pcl::MatDepth>& depth_wrapper)  
+   void source_cb1_oni(const MatDepth& depth_wrapper)  
   {        
     {
       boost::mutex::scoped_lock lock(data_ready_mutex_);
       if (exit_)
           return;
       
-      depth_.cols = depth_wrapper->cols;
-      depth_.rows = depth_wrapper->rows;
+      depth_.cols = depth_wrapper.cols;
+      depth_.rows = depth_wrapper.rows;
       depth_.step = depth_.cols * depth_.elemSize();
 
       source_depth_data_.resize(depth_.cols * depth_.rows);
       //depth_wrapper->fillDepthImageRaw(depth_.cols, depth_.rows, &source_depth_data_[0]);
-	  memcpy(&source_depth_data_[0],depth_wrapper->data,depth_.cols * depth_.rows);
+	  memcpy(&source_depth_data_[0],depth_wrapper.data,depth_.cols * depth_.rows);
       depth_.data = &source_depth_data_[0];     
     }
     data_ready_cond_.notify_one();
   }
 
-  void source_cb2_oni(const boost::shared_ptr<const cv::Mat>& image_wrapper, const boost::shared_ptr<const pcl::MatDepth>& depth_wrapper, float)
+  void source_cb2_oni(const boost::shared_ptr<const cv::Mat>& image_wrapper, const pcl::MatDepth& depth_wrapper, float)
   {
     {
       boost::mutex::scoped_lock lock(data_ready_mutex_);
       if (exit_)
           return;
                   
-      depth_.cols = depth_wrapper->cols;
-      depth_.rows = depth_wrapper->rows;
+      depth_.cols = depth_wrapper.cols;
+      depth_.rows = depth_wrapper.rows;
       depth_.step = depth_.cols * depth_.elemSize();
 
       source_depth_data_.resize(depth_.cols * depth_.rows);
       //depth_wrapper->fillDepthImageRaw(depth_.cols, depth_.rows, &source_depth_data_[0]);
-	  memcpy(&source_depth_data_[0],depth_wrapper->data,depth_.cols * depth_.rows);
+	  memcpy(&source_depth_data_[0],depth_wrapper.data,depth_.cols * depth_.rows);
       depth_.data = &source_depth_data_[0];      
       
       rgb24_.cols = image_wrapper->cols;
@@ -936,7 +936,7 @@ struct KinFuApp
   startMainLoop (bool triggered_capture)
   {   
     //using namespace openni_wrapper;
-    typedef boost::shared_ptr<const pcl::MatDepth> DepthImagePtr;
+    typedef const pcl::MatDepth DepthImagePtr;
     typedef boost::shared_ptr<const cv::Mat> ImagePtr;
         
     boost::function<void (const ImagePtr&, const DepthImagePtr&, float constant)> func1_dev = boost::bind (&KinFuApp::source_cb2_device, this, _1, _2, _3);
@@ -1206,7 +1206,7 @@ main (int argc, char* argv[])
   {    
     if (pc::parse_argument (argc, argv, "-dev", openni_device) > 0)
     {
-      capture.reset (new pcl::MicrosoftGrabber ());
+      capture.reset (new pcl::Microsoft2Grabber ());
     }
     else if (pc::parse_argument (argc, argv, "-oni", oni_file) > 0)
     {
@@ -1232,7 +1232,7 @@ main (int argc, char* argv[])
     }
     else
     {
-      capture.reset( new pcl::MicrosoftGrabber() );
+      capture.reset( new pcl::Microsoft2Grabber() );
         
       //triggered_capture = true; capture.reset( new pcl::ONIGrabber("d:/onis/20111013-224932.oni", true, ! triggered_capture) );
       //triggered_capture = true; capture.reset( new pcl::ONIGrabber("d:/onis/reg20111229-180846.oni, true, ! triggered_capture) );    

@@ -20,16 +20,21 @@ project(PCL_KinectKinfu)
 
 add_subdirectory(src)
 
+set(KinectSDK_INCLUDE "default value" CACHE FILEPATH "Include directories for Kinect2 SDK")
+set(KinectSDK_LIB "default value" CACHE FILEPATH "Include directories for Kinect2 SDK")
+
 include_directories(C:/opencv/build)
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(C:/blepo/external64/Microsoft/Kinect)
 include_directories(${PCL_KinectKinfu_SOURCE_DIR}/include)
-include_directories(../PCL_WindowsKinectSDK/include)
+include_directories(../PCL_Kinect2SDK/include)
 include_directories("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.5/include")
+include_directories(${KinectSDK_INCLUDE})
 
 link_directories(${PCL_LIBRARY_DIRS})
 link_directories(C:/blepo/external64/Microsoft/Kinect)
-link_directories(../../PCL_WindowsKinectSDK/build/)
+link_directories(../../PCL_Kinect2SDK/build/)
+link_directories(${KinectSDK_LIB})
 
 add_definitions(${PCL_DEFINITIONS})
 
@@ -45,4 +50,4 @@ list(REMOVE_DUPLICATES PCL_KinectKinfu_INCLUDE_DIRS)
 include_directories(${PCL_KinectKinfu_INCLUDE_DIRS})
 
 add_executable (PCL_KinectKinfu ${PCL_KinectKinfu_SOURCES} ${PCL_KinectKinfu_HEADERS})
-target_link_libraries (PCL_KinectKinfu ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${PCL_LIBRARIES} ${OpenCV_LIBS} Kinect10.lib debug Debug/PCL_WindowsKinectSDK optimized Release/PCL_WindowsKinectSDK)
+target_link_libraries (PCL_KinectKinfu ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} ${PCL_LIBRARIES} ${OpenCV_LIBS} Kinect20.lib debug Debug/PCL_Kinect2SDK optimized Release/PCL_Kinect2SDK)
