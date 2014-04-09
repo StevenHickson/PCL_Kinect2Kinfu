@@ -29,7 +29,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${PCL_KinectKinfu_SOURCE_DIR}/include)
 include_directories(../PCL_Kinect2SDK/include)
-include_directories(${CUDA_CUT_INCLUDE} ${CUDA_INCLUDE})
+include_directories(${CUDA_TOOLKIT_INCLUDE})
 include_directories(${KinectSDK_INCLUDE})
 
 link_directories(${PCL_LIBRARY_DIRS})
