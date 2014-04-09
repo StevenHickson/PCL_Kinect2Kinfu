@@ -314,7 +314,7 @@ struct CurrentFrameCloudView
 
     cloud_viewer_.setBackgroundColor (0, 0, 0.15);
     cloud_viewer_.setPointCloudRenderingProperties (visualization::PCL_VISUALIZER_POINT_SIZE, 1);
-    cloud_viewer_.addCoordinateSystem (1.0);
+    cloud_viewer_.addCoordinateSystem (1.0,"global");
     cloud_viewer_.initCameraParameters ();
     cloud_viewer_.setPosition (0, 500);
     cloud_viewer_.setSize (640, 480);
@@ -469,7 +469,7 @@ struct SceneCloudView
         cloud_viewer_ = pcl::visualization::PCLVisualizer::Ptr( new pcl::visualization::PCLVisualizer("Scene Cloud Viewer") );
 
         cloud_viewer_->setBackgroundColor (0, 0, 0);
-        cloud_viewer_->addCoordinateSystem (1.0);
+        cloud_viewer_->addCoordinateSystem (1.0,"global");
         cloud_viewer_->initCameraParameters ();
         cloud_viewer_->setPosition (0, 500);
         cloud_viewer_->setSize (640, 480);
@@ -945,7 +945,7 @@ struct KinFuApp
     boost::function<void (const ImagePtr&, const DepthImagePtr&, float constant)> func1_oni = boost::bind (&KinFuApp::source_cb2_oni, this, _1, _2, _3);
     boost::function<void (const DepthImagePtr&)> func2_oni = boost::bind (&KinFuApp::source_cb1_oni, this, _1);
     
-    bool is_oni = dynamic_cast<pcl::ONIGrabber*>(&capture_) != 0;
+    bool is_oni = false; //dynamic_cast<pcl::ONIGrabber*>(&capture_) != 0;
     boost::function<void (const ImagePtr&, const DepthImagePtr&, float constant)> func1 = is_oni ? func1_oni : func1_dev;
     boost::function<void (const DepthImagePtr&)> func2 = is_oni ? func2_oni : func2_dev;
 
@@ -1208,12 +1208,12 @@ main (int argc, char* argv[])
     {
       capture.reset (new pcl::Microsoft2Grabber ());
     }
-    else if (pc::parse_argument (argc, argv, "-oni", oni_file) > 0)
-    {
-      triggered_capture = true;
-      bool repeat = false; // Only run ONI file once
-      capture.reset (new pcl::ONIGrabber (oni_file, repeat, ! triggered_capture));
-    }
+    //else if (pc::parse_argument (argc, argv, "-oni", oni_file) > 0)
+    //{
+    //  triggered_capture = true;
+    //  bool repeat = false; // Only run ONI file once
+    //  capture.reset (new pcl::ONIGrabber (oni_file, repeat, ! triggered_capture));
+    //}
     else if (pc::parse_argument (argc, argv, "-pcd", pcd_dir) > 0)
     {
       float fps_pcd = 15.0f;
