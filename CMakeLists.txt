@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+project(PCL_KinectKinfu)
+
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
 IF(WIN32 OR win64)
@@ -16,23 +18,21 @@ FIND_PACKAGE(CUDA REQUIRED)
 SET(CUDA_NVCC_FLAGS "-arch=sm_20" CACHE STRING "nvcc flags" FORCE)
 #SET (CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
 
-project(PCL_KinectKinfu)
+
 
 add_subdirectory(src)
 
-set(KinectSDK_INCLUDE "default value" CACHE FILEPATH "Include directories for Kinect2 SDK")
-set(KinectSDK_LIB "default value" CACHE FILEPATH "Include directories for Kinect2 SDK")
+set(KinectSDK_INCLUDE "default value" CACHE PATH "Include directories for Kinect2 SDK")
+set(KinectSDK_LIB "default value" CACHE PATH "Include directories for Kinect2 SDK")
 
-include_directories(C:/opencv/build)
+include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
-include_directories(C:/blepo/external64/Microsoft/Kinect)
 include_directories(${PCL_KinectKinfu_SOURCE_DIR}/include)
 include_directories(../PCL_Kinect2SDK/include)
-include_directories("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v5.5/include")
+include_directories(${CUDA_CUT_INCLUDE} ${CUDA_INCLUDE})
 include_directories(${KinectSDK_INCLUDE})
 
 link_directories(${PCL_LIBRARY_DIRS})
-link_directories(C:/blepo/external64/Microsoft/Kinect)
 link_directories(../../PCL_Kinect2SDK/build/)
 link_directories(${KinectSDK_LIB})
 
