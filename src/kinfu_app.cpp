@@ -653,7 +653,10 @@ struct KinFuApp
   {    
     //Init Kinfu Tracker
     Eigen::Vector3f volume_size = Vector3f::Constant (vsz/*meters*/);    
-    kinfu_.volume().setSize (volume_size);
+
+	
+	kinfu_.volume().setSize (volume_size);
+
 
     Eigen::Matrix3f R = Eigen::Matrix3f::Identity ();   // * AngleAxisf( pcl::deg2rad(-30.f), Vector3f::UnitX());
     Eigen::Vector3f t = volume_size * 0.5f - Vector3f (0, 0, volume_size (2) / 2 * 1.2f);
@@ -1252,6 +1255,15 @@ main (int argc, char* argv[])
   pc::parse_argument (argc, argv, "--viz", visualization);
         
   KinFuApp app (*capture, volume_size, icp, visualization);
+  
+  //default intrinsics
+  std::vector<float> depthIntrins;
+  depthIntrins.push_back(364.5731);
+  depthIntrins.push_back(364.5731);
+  depthIntrins.push_back(256.6805);
+  depthIntrins.push_back(201.0916);
+
+  app.setDepthIntrinsics(depthIntrins);
 
   if (pc::parse_argument (argc, argv, "-eval", eval_folder) > 0)
     app.toggleEvaluationMode(eval_folder, match_file);
@@ -1285,6 +1297,9 @@ main (int argc, char* argv[])
   }
 
   // executing
+
+  
+
   try { app.startMainLoop (triggered_capture); }
   catch (const pcl::PCLException& e) { cout << "PCLException: " << e.what() << endl; }
   catch (const std::bad_alloc& e) { cout << "Bad alloc: " << e.what() << endl; }
