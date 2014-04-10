@@ -314,7 +314,7 @@ struct CurrentFrameCloudView
 
     cloud_viewer_.setBackgroundColor (0, 0, 0.15);
     cloud_viewer_.setPointCloudRenderingProperties (visualization::PCL_VISUALIZER_POINT_SIZE, 1);
-    cloud_viewer_.addCoordinateSystem (1.0);
+    cloud_viewer_.addCoordinateSystem (1.0,"global");
     cloud_viewer_.initCameraParameters ();
     cloud_viewer_.setPosition (0, 500);
     cloud_viewer_.setSize (640, 480);
@@ -469,7 +469,7 @@ struct SceneCloudView
         cloud_viewer_ = pcl::visualization::PCLVisualizer::Ptr( new pcl::visualization::PCLVisualizer("Scene Cloud Viewer") );
 
         cloud_viewer_->setBackgroundColor (0, 0, 0);
-        cloud_viewer_->addCoordinateSystem (1.0);
+        cloud_viewer_->addCoordinateSystem (1.0,"global");
         cloud_viewer_->initCameraParameters ();
         cloud_viewer_->setPosition (0, 500);
         cloud_viewer_->setSize (640, 480);
@@ -653,7 +653,10 @@ struct KinFuApp
   {    
     //Init Kinfu Tracker
     Eigen::Vector3f volume_size = Vector3f::Constant (vsz/*meters*/);    
-    kinfu_.volume().setSize (volume_size);
+
+	
+	kinfu_.volume().setSize (volume_size);
+
 
     Eigen::Matrix3f R = Eigen::Matrix3f::Identity ();   // * AngleAxisf( pcl::deg2rad(-30.f), Vector3f::UnitX());
     Eigen::Vector3f t = volume_size * 0.5f - Vector3f (0, 0, volume_size (2) / 2 * 1.2f);
@@ -945,7 +948,7 @@ struct KinFuApp
     boost::function<void (const ImagePtr&, const DepthImagePtr&, float constant)> func1_oni = boost::bind (&KinFuApp::source_cb2_oni, this, _1, _2, _3);
     boost::function<void (const DepthImagePtr&)> func2_oni = boost::bind (&KinFuApp::source_cb1_oni, this, _1);
     
-    bool is_oni = dynamic_cast<pcl::ONIGrabber*>(&capture_) != 0;
+    bool is_oni = false; //dynamic_cast<pcl::ONIGrabber*>(&capture_) != 0;
     boost::function<void (const ImagePtr&, const DepthImagePtr&, float constant)> func1 = is_oni ? func1_oni : func1_dev;
     boost::function<void (const DepthImagePtr&)> func2 = is_oni ? func2_oni : func2_dev;
 
@@ -1208,12 +1211,12 @@ main (int argc, char* argv[])
     {
       capture.reset (new pcl::Microsoft2Grabber ());
     }
-    else if (pc::parse_argument (argc, argv, "-oni", oni_file) > 0)
-    {
-      triggered_capture = true;
-      bool repeat = false; // Only run ONI file once
-      capture.reset (new pcl::ONIGrabber (oni_file, repeat, ! triggered_capture));
-    }
+    //else if (pc::parse_argument (argc, argv, "-oni", oni_file) > 0)
+    //{
+    //  triggered_capture = true;
+    //  bool repeat = false; // Only run ONI file once
+    //  capture.reset (new pcl::ONIGrabber (oni_file, repeat, ! triggered_capture));
+    //}
     else if (pc::parse_argument (argc, argv, "-pcd", pcd_dir) > 0)
     {
       float fps_pcd = 15.0f;
@@ -1252,6 +1255,15 @@ main (int argc, char* argv[])
   pc::parse_argument (argc, argv, "--viz", visualization);
         
   KinFuApp app (*capture, volume_size, icp, visualization);
+  
+  //default intrinsics
+  std::vector<float> depthIntrins;
+  depthIntrins.push_back(364.5731);
+  depthIntrins.push_back(364.5731);
+  depthIntrins.push_back(256.6805);
+  depthIntrins.push_back(201.0916);
+
+  app.setDepthIntrinsics(depthIntrins);
 
   if (pc::parse_argument (argc, argv, "-eval", eval_folder) > 0)
     app.toggleEvaluationMode(eval_folder, match_file);
@@ -1285,6 +1297,9 @@ main (int argc, char* argv[])
   }
 
   // executing
+
+  
+
   try { app.startMainLoop (triggered_capture); }
   catch (const pcl::PCLException& e) { cout << "PCLException: " << e.what() << endl; }
   catch (const std::bad_alloc& e) { cout << "Bad alloc: " << e.what() << endl; }
